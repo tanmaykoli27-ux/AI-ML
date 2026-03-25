@@ -1,10 +1,16 @@
-# AI-Powered Smart Tourism Recommender
-# Student Name: Tanmay Koli
+# AI-Powered Smart Tourism Recommender & Demand Optimizer
+# Student: Tanmay Koli
 
 import pandas as pd
+import numpy as np
 from sklearn.metrics.pairwise import cosine_similarity
+from sklearn.linear_model import LinearRegression
 
-# Sample dataset of users and places they rated
+
+# -------------------------------
+# PART 1: TOURISM RECOMMENDER
+# -------------------------------
+
 data = {
     "User": ["U1","U1","U1","U2","U2","U2","U3","U3","U3","U4","U4"],
     
@@ -27,13 +33,8 @@ data = {
 
 df = pd.DataFrame(data)
 
-# Convert into user-item matrix
 matrix = df.pivot_table(index="User", columns="Place", values="Rating").fillna(0)
 
-print("User-Item Matrix:\n")
-print(matrix)
-
-# Calculate similarity between items
 similarity = cosine_similarity(matrix.T)
 
 similarity_df = pd.DataFrame(
@@ -42,19 +43,52 @@ similarity_df = pd.DataFrame(
     columns=matrix.columns
 )
 
-print("\nItem Similarity Matrix:\n")
-print(similarity_df)
-
-# Function to recommend places
 def recommend(place_name, top_n=3):
-    
+
     scores = similarity_df[place_name].sort_values(ascending=False)
-    
+
     scores = scores.drop(place_name)
-    
+
     return scores.head(top_n)
 
-# Example recommendation
-print("\nRecommended places if user liked Jaipur Fort:\n")
 
-print(recommend("Jaipur Fort"))
+# -------------------------------
+# PART 2: DEMAND OPTIMIZER
+# -------------------------------
+
+def predict_demand():
+
+    # month vs booking data
+    months = np.array([1,2,3,4,5,6]).reshape(-1,1)
+
+    bookings = np.array([120,150,170,200,220,260])
+
+    model = LinearRegression()
+
+    model.fit(months, bookings)
+
+    future_month = np.array([[7]])
+
+    prediction = model.predict(future_month)
+
+    return int(prediction[0])
+
+
+# -------------------------------
+# MAIN PROGRAM
+# -------------------------------
+
+print("\n--- TOURISM RECOMMENDER ---")
+
+place = input("Enter place you liked: ")
+
+print("\nRecommended places:\n")
+
+print(recommend(place))
+
+
+print("\n--- DEMAND OPTIMIZER ---")
+
+result = predict_demand()
+
+print("\nExpected bookings next month:", result)
